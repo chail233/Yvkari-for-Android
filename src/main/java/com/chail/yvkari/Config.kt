@@ -22,4 +22,8 @@ object Config {
     var model: String
         get() = sp.getString("model", "") ?:""
         set(value) = sp.edit { putString("model", value) }
+
+    var recordLimit: Int//对话轮数上限
+        get() = sp.getInt("record_limit", 20)
+        set(value) = sp.edit {putInt("record_limit", value)}
 }
