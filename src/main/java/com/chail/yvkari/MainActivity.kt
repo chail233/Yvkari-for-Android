@@ -177,7 +177,7 @@ fun ChatPage() {
             inputText = inputText,
             onValueChange = { inputText = it },
             onSend = {
-                if (inputText.isNotBlank()) {
+                if (inputText.trim().isNotBlank()) {
                     val userMsg = UserMsg(
                         time = getFullTime(),
                         content = MsgContent("text", inputText)
