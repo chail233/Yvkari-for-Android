@@ -38,7 +38,8 @@ data class AIMsg(
     override fun build(): String {
         var text = "[$time][内心:$think]\n"
         for(item in content){
-            text += "[${item.type}]${item.content}\n"
+            val type = if (item.type== MsgType.Text) "文本" else "图片"
+            text += "[${type}]${item.content}\n"
         }
         return text
     }
