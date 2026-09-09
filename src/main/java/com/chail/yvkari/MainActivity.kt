@@ -47,6 +47,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
@@ -70,6 +71,7 @@ import com.chail.yvkari.ui.theme.YukariPrimary
 import com.chail.yvkari.ui.theme.YukariTextPrimary
 import com.chail.yvkari.ui.theme.YukariTextSecondary
 import com.chail.yvkari.ui.theme.YukariTextTertiary
+import com.chail.yvkari.ui.theme.YukariAiBubble
 import com.chail.yvkari.ui.theme.YukariUserBubble
 import com.chail.yvkari.ui.theme.YvkariTheme
 import com.google.gson.Gson
@@ -369,7 +371,7 @@ fun ChatBubble(msg: Message) {
             Box(
                 modifier = Modifier
                     .background(
-                        color = if (isUser) YukariUserBubble else Color.White,
+                        color = if (isUser) YukariUserBubble else YukariAiBubble,
                         shape = RoundedCornerShape(
                             topStart = 16.dp,
                             topEnd = 16.dp,
@@ -406,7 +408,7 @@ fun TypingBubble() {
         initialValue = 0f,
         targetValue = 2f * PI.toFloat(),
         animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 1400),
+            animation = tween(durationMillis = 1200),
             repeatMode = RepeatMode.Restart
         ),
         label = "dotPhase"
@@ -414,7 +416,7 @@ fun TypingBubble() {
 
     fun dotScale(index: Int): Float {
         val phaseOffset = index * 2f * PI.toFloat() / 3f
-        return 0.5f + 0.4f * sin(dotPhase + phaseOffset)
+        return 0.65f + 0.25f * sin(dotPhase + phaseOffset)
     }
 
     Box(
@@ -434,24 +436,15 @@ fun TypingBubble() {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(5.dp)
         ) {
-            Box(
-                modifier = Modifier
-                    .size((8.dp * dotScale(0)))
-                    .clip(CircleShape)
-                    .background(YukariPrimary.copy(alpha = 0.6f))
-            )
-            Box(
-                modifier = Modifier
-                    .size((8.dp * dotScale(1)))
-                    .clip(CircleShape)
-                    .background(YukariPrimary.copy(alpha = 0.6f))
-            )
-            Box(
-                modifier = Modifier
-                    .size((8.dp * dotScale(2)))
-                    .clip(CircleShape)
-                    .background(YukariPrimary.copy(alpha = 0.6f))
-            )
+            repeat(3) { idx ->
+                Box(
+                    modifier = Modifier
+                        .size(8.dp)
+                        .scale(dotScale(idx))
+                        .clip(CircleShape)
+                        .background(YukariPrimary.copy(alpha = 0.6f))
+                )
+            }
         }
     }
 }
