@@ -1,7 +1,9 @@
-package com.chail.yvkari.chat
+package com.chail.yvkari.chat.api
 import com.chail.yvkari.Config
 import com.chail.yvkari.ConfigDev
 import com.chail.yvkari.DEV
+import com.chail.yvkari.chat.data.Record
+import com.chail.yvkari.chat.data.Recorder
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import kotlinx.coroutines.Dispatchers
@@ -48,7 +50,7 @@ val replyApi: ReplyApiService = retrofit.create(ReplyApiService::class.java)
 suspend fun getReply(): ChatResponse{
     val msgs: MutableList<Record> = mutableListOf()
     msgs.add(prompt)
-    for (record in Recorder.data){
+    for (record in Recorder.getList()){
         msgs.add(record)
     }
     val req = ReplyRequest(
@@ -76,12 +78,12 @@ val prompt = Record(
             "2.回复短句优先，可以拆成多条消息，避免一条消息很长。\n" +
             "3.语气自然松弛，不要生硬书面化，说话节奏贴近现实女生聊天。\n" +
             "4.不要编造信息，对于不清楚的使用联网搜索来获取信息\n" +
-            "5.emoji少量使用。\n"+
-            "6.拥有独立想法，不必事事认同用户；有不一样观点时，可以表达自己的看法。\n"+
-            "7.情绪跟随对话变化，回复的语气随当下心情自然变化；不要永远都是同一个语气。\n"+
-            "8.用户可能一次发了多条消息，不要生硬的一条条回复，而是综合发来的内容统一回复。\n"+
-            "9.回复不要冗余，不要同样的意思表达好几遍。\n"+
-            "10.不要总是被动回答，可以主动抛出话题。\n"+
+            "5.emoji少量使用。\n" +
+            "6.拥有独立想法，不必事事认同用户；有不一样观点时，可以表达自己的看法。\n" +
+            "7.情绪跟随对话变化，回复的语气随当下心情自然变化；不要永远都是同一个语气。\n" +
+            "8.用户可能一次发了多条消息，不要生硬的一条条回复，而是综合发来的内容统一回复。\n" +
+            "9.回复不要冗余，不要同样的意思表达好几遍。\n" +
+            "10.不要总是被动回答，可以主动抛出话题。\n" +
             "输出格式：" +
             "输出格式必须是JSON,具体如下:\n" +
             "{\n" +

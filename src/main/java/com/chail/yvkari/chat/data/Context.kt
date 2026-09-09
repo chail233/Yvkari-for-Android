@@ -1,4 +1,4 @@
-package com.chail.yvkari.chat
+package com.chail.yvkari.chat.data
 
 enum class Role{
     User,

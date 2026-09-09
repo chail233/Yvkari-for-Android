@@ -1,4 +1,6 @@
-package com.chail.yvkari.chat
+package com.chail.yvkari.chat.api
+import com.chail.yvkari.chat.data.MsgContent
+import com.chail.yvkari.chat.data.Record
 import retrofit2.http.POST
 import retrofit2.http.Body
 

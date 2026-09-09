@@ -38,8 +38,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -50,21 +50,24 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.chail.yvkari.chat.AIMsg
-import com.chail.yvkari.chat.ChatResponse
-import com.chail.yvkari.chat.MessageContent
-import com.chail.yvkari.chat.MsgContent
-import com.chail.yvkari.chat.Record
-import com.chail.yvkari.chat.Recorder
-import com.chail.yvkari.chat.Role
-import com.chail.yvkari.chat.UserMsg
-import com.chail.yvkari.chat.getReply
+import com.chail.yvkari.chat.data.AIMsg
+import com.chail.yvkari.chat.api.ChatResponse
+import com.chail.yvkari.chat.api.MessageContent
+import com.chail.yvkari.chat.data.MsgContent
+import com.chail.yvkari.chat.data.Record
+import com.chail.yvkari.chat.data.Recorder
+import com.chail.yvkari.chat.data.Role
+import com.chail.yvkari.chat.data.UserMsg
+import com.chail.yvkari.chat.api.getReply
+import com.chail.yvkari.chat.data.Message
+import com.chail.yvkari.chat.data.MessageRepository
 import com.chail.yvkari.ui.theme.YukariAvatarBg
 import com.chail.yvkari.ui.theme.YukariBackground
 import com.chail.yvkari.ui.theme.YukariPrimary
@@ -96,16 +99,16 @@ class MainActivity : ComponentActivity() {
     }
 }
 const val DEV = true//是否处于开发模式
-data class Message(//用于UI的数据
-    val role: Role,
-    val content: String,
-    val time: String
-)
+
+
 
 @Composable
 fun ChatPage() {
+    val ctx = LocalContext.current.applicationContext
+    val repo = remember { MessageRepository(ctx) }
+    val msgFlow =repo.observeAllMessages()
     var inputText by remember { mutableStateOf("") }
-    val messageList = remember { mutableStateListOf<Message>() }
+    val messageList by msgFlow.collectAsState(emptyList())
     var loading by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
     val listState = rememberLazyListState()
@@ -187,9 +190,14 @@ fun ChatPage() {
                     val textToSend = inputText
                     val gson = Gson()
                     inputText = ""
-                    messageList.add(Message(Role.User, textToSend, getTime(userMsg.time)))
-                    Recorder.push(Record("user", gson.toJson(userMsg)))
                     coroutineScope.launch {
+                        Recorder.push(Record("user", gson.toJson(userMsg)))
+                        repo.insertMessage(Message(
+                            role = Role.User,
+                            content = textToSend,
+                            time = getTime(userMsg.time),
+                            timeStamp = System.currentTimeMillis()
+                        ))
                         loading = true
                         try {
                             val res: ChatResponse = getReply()
@@ -205,7 +213,14 @@ fun ChatPage() {
                             Recorder.push(replyStr)
                             for (it in aiMsg.content) {
                                 delay(2000.milliseconds)
-                                messageList.add(Message(Role.Ai, it.content, getTime(aiMsg.time)))
+                                repo.insertMessage(
+                                    Message(
+                                        role = Role.Ai,
+                                        content = it.content,
+                                        time = getTime(aiMsg.time),
+                                        timeStamp = System.currentTimeMillis()
+                                    )
+                                )
                             }
                         } catch (e: Exception) {
                             println("网络请求错误${e.message}")
