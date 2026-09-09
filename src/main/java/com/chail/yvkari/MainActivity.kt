@@ -59,7 +59,6 @@ import com.chail.yvkari.chat.AIMsg
 import com.chail.yvkari.chat.ChatResponse
 import com.chail.yvkari.chat.MessageContent
 import com.chail.yvkari.chat.MsgContent
-import com.chail.yvkari.chat.MsgType
 import com.chail.yvkari.chat.Record
 import com.chail.yvkari.chat.Recorder
 import com.chail.yvkari.chat.Role
@@ -180,14 +179,14 @@ fun ChatPage() {
             onSend = {
                 if (inputText.isNotBlank()) {
                     val userMsg = UserMsg(
-                        role = Role.User,
-                        content = MsgContent(MsgType.Text, inputText),
-                        time = getFullTime()
+                        time = getFullTime(),
+                        content = MsgContent("text", inputText)
                     )
                     val textToSend = inputText
+                    val gson = Gson()
                     inputText = ""
                     messageList.add(Message(Role.User, textToSend, getTime(userMsg.time)))
-                    Recorder.push(Record("user", userMsg.build()))
+                    Recorder.push(Record("user", gson.toJson(userMsg)))
                     coroutineScope.launch {
                         loading = true
                         try {
@@ -196,13 +195,12 @@ fun ChatPage() {
                             val reply = parse(replyStr.content, MessageContent::class.java)
                                 ?: throw Exception("无法解析返回内容")
                             val aiMsg = AIMsg(
-                                role = Role.Ai,
                                 time = getFullTime(),
+                                content = reply.contents,
                                 think = reply.think,
-                                tokens = res.usage.total_tokens,
-                                content = reply.contents
+                                tokens = res.usage.total_tokens
                             )
-                            Recorder.push(Record("assistant", aiMsg.build()))
+                            Recorder.push(replyStr)
                             for (it in aiMsg.content) {
                                 delay(2000.milliseconds)
                                 messageList.add(Message(Role.Ai, it.content, getTime(aiMsg.time)))

@@ -21,12 +21,8 @@ data class MessageContent(
     val contents: List<MsgContent>,
     val think: String
 )
-data class Message(
-    val role: String,
-    val content: String
-)
 data class Choice(
-    val message: Message,
+    val message: Record,
     val finish_reason: String,
     val index: Int,
     val logprobs: String?

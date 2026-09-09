@@ -4,12 +4,8 @@ enum class Role{
     User,
     Ai
 }
-enum class MsgType{
-    Text,
-    Image
-}
 data class MsgContent(
-    val type: MsgType,
+    val type: String,
     val content: String
 )
 
@@ -18,18 +14,15 @@ interface BuildMsg{
 }
 
 data class UserMsg(
-    val role: Role,
     val time: String,
     val content: MsgContent
 ): BuildMsg{
     override fun build(): String {
-        val type = if (content.type== MsgType.Text) "文本" else "图片"
-        return "[$time][$type]${content.content}"
+        return "[$time][${content.type}]${content.content}"
     }
 }
 
 data class AIMsg(
-    val role: Role,
     val time: String,
     val content: List<MsgContent>,
     val think: String,
@@ -38,8 +31,7 @@ data class AIMsg(
     override fun build(): String {
         var text = "[$time][内心:$think]\n"
         for(item in content){
-            val type = if (item.type== MsgType.Text) "文本" else "图片"
-            text += "[${type}]${item.content}\n"
+            text += "[${item.type}]${item.content}\n"
         }
         return text
     }
