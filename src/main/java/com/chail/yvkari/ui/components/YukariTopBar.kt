@@ -1,6 +1,7 @@
 package com.chail.yvkari.ui.components
 
 import androidx.compose.foundation.background
+
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,6 +11,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,9 +27,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.chail.yvkari.ui.theme.YukariPrimary
 
-//  Top App Bar
 @Composable
-fun YukariTopBar() {
+fun YukariTopBar(
+    onSettingsClick: () -> Unit = {}
+) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         color = YukariPrimary,
@@ -34,10 +40,9 @@ fun YukariTopBar() {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 12.dp)
-                .padding(top = 8.dp), // extra top padding for status bar inset
+                .padding(top = 36.dp), // push below status bar
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Avatar in top bar
             Box(
                 modifier = Modifier
                     .size(36.dp)
@@ -53,7 +58,7 @@ fun YukariTopBar() {
                 )
             }
             Spacer(Modifier.width(12.dp))
-            Column {
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = "Yvkari",
                     color = Color.White,
@@ -67,13 +72,17 @@ fun YukariTopBar() {
                             .clip(CircleShape)
                             .background(Color(0xFF81C784))
                     )
-//                    Spacer(Modifier.width(4.dp))
-//                    Text(
-//                        text = "在线",
-//                        color = Color.White.copy(alpha = 0.8f),
-//                        fontSize = 12.sp
-//                    )
                 }
+            }
+
+            // Settings button
+            IconButton(onClick = onSettingsClick) {
+                Icon(
+                    imageVector = Icons.Filled.Settings,
+                    contentDescription = "设置",
+                    tint = Color.White,
+                    modifier = Modifier.size(28.dp)
+                )
             }
         }
     }

@@ -45,6 +45,7 @@ import com.chail.yvkari.parse
 import com.chail.yvkari.ui.components.AvatarCircle
 import com.chail.yvkari.ui.components.ChatBubble
 import com.chail.yvkari.ui.components.InputBar
+import com.chail.yvkari.ui.components.SettingsSheet
 import com.chail.yvkari.ui.components.TypingBubble
 import com.chail.yvkari.ui.components.WelcomeScreen
 import com.chail.yvkari.ui.theme.YukariBackground
@@ -62,6 +63,7 @@ fun ChatPage() {
     var inputText by remember { mutableStateOf("") }
     val messageList by msgFlow.collectAsState(emptyList())
     var loading by remember { mutableStateOf(false) }
+    var showSettings by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
     val listState = rememberLazyListState()
 
@@ -73,116 +75,126 @@ fun ChatPage() {
         }
     }
 
-    Column(modifier = Modifier.fillMaxSize().background(YukariBackground)) {
-        // ── Top Bar ──
-        YukariTopBar()
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(modifier = Modifier.fillMaxSize().background(YukariBackground)) {
+            // ── Top Bar ──
+            YukariTopBar(
+                onSettingsClick = { showSettings = true }
+            )
 
-        // ── Content Area ──
-        Box(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth()
-        ) {
-            if (messageList.isEmpty() && !loading) {
-                // Welcome screen
-                WelcomeScreen()
-            }
-
-            LazyColumn(
-                state = listState,
+            // ── Content Area ──
+            Box(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 12.dp),
-                verticalArrangement = Arrangement.spacedBy(6.dp),
-                contentPadding = PaddingValues(top = 8.dp, bottom = 8.dp)
+                    .weight(1f)
+                    .fillMaxWidth()
             ) {
-                items(messageList) { msg ->
-                    val msgAlpha by animateFloatAsState(
-                        targetValue = 1f,
-                        animationSpec = tween(300),
-                        label = "msgAlpha"
-                    )
-                    Box(
-                        modifier = Modifier.graphicsLayer(
-                            alpha = msgAlpha
-                        )
-                    ) {
-                        ChatBubble(msg)
-                    }
+                if (messageList.isEmpty() && !loading) {
+                    // Welcome screen
+                    WelcomeScreen()
                 }
 
-                // Animated typing indicator inside the list
-                if (loading) {
-                    item {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 4.dp),
-                            horizontalArrangement = Arrangement.Start
+                LazyColumn(
+                    state = listState,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 12.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp),
+                    contentPadding = PaddingValues(top = 8.dp, bottom = 8.dp)
+                ) {
+                    items(messageList) { msg ->
+                        val msgAlpha by animateFloatAsState(
+                            targetValue = 1f,
+                            animationSpec = tween(300),
+                            label = "msgAlpha"
+                        )
+                        Box(
+                            modifier = Modifier.graphicsLayer(
+                                alpha = msgAlpha
+                            )
                         ) {
-                            AvatarCircle(isUser = false, size = 40.dp)
-                            Spacer(Modifier.width(8.dp))
-                            TypingBubble()
+                            ChatBubble(msg)
+                        }
+                    }
+
+                    // Animated typing indicator inside the list
+                    if (loading) {
+                        item {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 4.dp),
+                                horizontalArrangement = Arrangement.Start
+                            ) {
+                                AvatarCircle(isUser = false, size = 40.dp)
+                                Spacer(Modifier.width(8.dp))
+                                TypingBubble()
+                            }
                         }
                     }
                 }
             }
+
+            // ── Input Bar ──
+            InputBar(
+                inputText = inputText,
+                onValueChange = { inputText = it },
+                onSend = {
+                    if (inputText.trim().isNotBlank()) {
+                        val userMsg = UserMsg(
+                            time = getFullTime(),
+                            content = MsgContent("text", inputText)
+                        )
+                        val textToSend = inputText
+                        val gson = Gson()
+                        inputText = ""
+                        coroutineScope.launch {
+                            Recorder.push(Record("user", gson.toJson(userMsg)))
+                            repo.insertMessage(Message(
+                                role = Role.User,
+                                content = textToSend,
+                                time = getTime(userMsg.time),
+                                timeStamp = System.currentTimeMillis()
+                            ))
+                            loading = true
+                            try {
+                                val res: ChatResponse = getReply()
+                                val replyStr = res.choices[0].message
+                                val reply = parse(replyStr.content, MessageContent::class.java)
+                                    ?: throw Exception("无法解析返回内容")
+                                val aiMsg = AIMsg(
+                                    time = getFullTime(),
+                                    content = reply.contents,
+                                    think = reply.think,
+                                    tokens = res.usage.total_tokens
+                                )
+                                Recorder.push(replyStr)
+                                for (it in aiMsg.content) {
+                                    delay(2000.milliseconds)
+                                    repo.insertMessage(
+                                        Message(
+                                            role = Role.Ai,
+                                            content = it.content,
+                                            time = getTime(aiMsg.time),
+                                            timeStamp = System.currentTimeMillis()
+                                        )
+                                    )
+                                }
+                            } catch (e: Exception) {
+                                println("网络请求错误${e.message}")
+                            } finally {
+                                loading = false
+                            }
+                        }
+                    }
+                },
+                enabled = !loading
+            )
         }
 
-        // ── Input Bar ──
-        InputBar(
-            inputText = inputText,
-            onValueChange = { inputText = it },
-            onSend = {
-                if (inputText.trim().isNotBlank()) {
-                    val userMsg = UserMsg(
-                        time = getFullTime(),
-                        content = MsgContent("text", inputText)
-                    )
-                    val textToSend = inputText
-                    val gson = Gson()
-                    inputText = ""
-                    coroutineScope.launch {
-                        Recorder.push(Record("user", gson.toJson(userMsg)))
-                        repo.insertMessage(Message(
-                            role = Role.User,
-                            content = textToSend,
-                            time = getTime(userMsg.time),
-                            timeStamp = System.currentTimeMillis()
-                        ))
-                        loading = true
-                        try {
-                            val res: ChatResponse = getReply()
-                            val replyStr = res.choices[0].message
-                            val reply = parse(replyStr.content, MessageContent::class.java)
-                                ?: throw Exception("无法解析返回内容")
-                            val aiMsg = AIMsg(
-                                time = getFullTime(),
-                                content = reply.contents,
-                                think = reply.think,
-                                tokens = res.usage.total_tokens
-                            )
-                            Recorder.push(replyStr)
-                            for (it in aiMsg.content) {
-                                delay(2000.milliseconds)
-                                repo.insertMessage(
-                                    Message(
-                                        role = Role.Ai,
-                                        content = it.content,
-                                        time = getTime(aiMsg.time),
-                                        timeStamp = System.currentTimeMillis()
-                                    )
-                                )
-                            }
-                        } catch (e: Exception) {
-                            println("网络请求错误${e.message}")
-                        } finally {
-                            loading = false
-                        }
-                    }
-                }
-            },
-            enabled = !loading
+        // ── Settings Panel
+        SettingsSheet(
+            visible = showSettings,
+            onDismiss = { showSettings = false }
         )
     }
 }
