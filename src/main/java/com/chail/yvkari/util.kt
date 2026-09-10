@@ -1,6 +1,7 @@
 package com.chail.yvkari
 
 import com.google.gson.Gson
+import retrofit2.HttpException
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -32,5 +33,17 @@ fun <T> parse(jsonStr: String, clazz: Class<T>): T? {
     } catch (e: Exception) {
         println("解析失败：$e 原始文本=$jsonStr")
         null
+    }
+}
+
+fun getFullException(e: Throwable) : String{
+    when(e) {
+        is HttpException -> {
+            val body = e.response()?.errorBody()?.string()
+            return ("==== HTTP ERROR ${e.code()} ====\n")+ ("response error body: $body\n")+("完整堆栈:\n${e.stackTraceToString()}")
+        }
+        else -> {
+            return ("==== EXCEPTION ====")+("完整堆栈:\n${e.stackTraceToString()}")
+        }
     }
 }

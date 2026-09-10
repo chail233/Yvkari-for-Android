@@ -39,6 +39,7 @@ import com.chail.yvkari.chat.data.Record
 import com.chail.yvkari.chat.data.Recorder
 import com.chail.yvkari.chat.data.Role
 import com.chail.yvkari.chat.data.UserMsg
+import com.chail.yvkari.getFullException
 import com.chail.yvkari.getFullTime
 import com.chail.yvkari.getTime
 import com.chail.yvkari.parse
@@ -184,7 +185,7 @@ fun ChatPage() {
                                 repo.insertMessage(
                                     Message(
                                         role = Role.Ai,
-                                        content = e.message?:"error",
+                                        content = getFullException(e),
                                         time = getTime(getFullTime()),
                                         timeStamp = System.currentTimeMillis()
                                     )
