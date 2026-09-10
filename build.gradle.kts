@@ -48,12 +48,13 @@ ksp {
     arg("room.generateKotlin", "true")
 }
 
+
+
 dependencies {
     implementation("androidx.room:room-runtime:2.7.0")
     ksp("androidx.room:room-compiler:2.7.0")
     implementation("androidx.room:room-ktx:2.7.0")
     implementation("com.squareup.okhttp3:okhttp:5.5.0")
-    implementation("com.squareup.okhttp3:logging-interceptor:5.5.0")
     // Retrofit 核心库
     implementation("com.squareup.retrofit2:retrofit:3.0.0")
     // 用于 JSON 自动转换的 Converter
@@ -64,7 +65,6 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.11.0")
     // Kotlin 协程 Android 支持库
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.11.0")
-    implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.ui)
