@@ -1,0 +1,36 @@
+package com.chail.yvkari
+
+import com.google.gson.Gson
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+
+//  Utilities
+fun getTime(time: String): String {
+//    val format = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+//    val date = format.parse(time)
+//    date?.let {
+//        val calendar = Calendar.getInstance()
+//        calendar.time = it
+//        val hour = calendar.get(Calendar.HOUR_OF_DAY)
+//        val minute = calendar.get(Calendar.MINUTE)
+//        return "$hour:$minute"
+//    }
+//    return "
+    return time
+}
+fun getFullTime(): String {
+    val sdf = SimpleDateFormat("yyyy‑MM‑dd HH:mm:ss", Locale.CHINA)
+    val ms = System.currentTimeMillis()
+    return sdf.format(Date(ms))
+}
+
+fun <T> parse(jsonStr: String, clazz: Class<T>): T? {
+    val gson = Gson()
+    return try {
+        gson.fromJson(jsonStr, clazz)
+    } catch (e: Exception) {
+        println("解析失败：$e 原始文本=$jsonStr")
+        null
+    }
+}
