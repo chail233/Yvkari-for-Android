@@ -214,6 +214,12 @@ fun SettingsSheet(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
+
+                    Text(
+                        text = "调试模式",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
             }
         }

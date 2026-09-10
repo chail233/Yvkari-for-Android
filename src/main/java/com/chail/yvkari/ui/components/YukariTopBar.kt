@@ -40,7 +40,7 @@ fun YukariTopBar(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 12.dp)
-                .padding(top = 36.dp), // push below status bar
+                .padding(top = 12.dp), // push below status bar
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(

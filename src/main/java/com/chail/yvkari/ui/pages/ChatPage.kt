@@ -181,6 +181,14 @@ fun ChatPage() {
                                 }
                             } catch (e: Exception) {
                                 println("网络请求错误${e.message}")
+                                repo.insertMessage(
+                                    Message(
+                                        role = Role.Ai,
+                                        content = e.message?:"error",
+                                        time = getTime(getFullTime()),
+                                        timeStamp = System.currentTimeMillis()
+                                    )
+                                )
                             } finally {
                                 loading = false
                             }
