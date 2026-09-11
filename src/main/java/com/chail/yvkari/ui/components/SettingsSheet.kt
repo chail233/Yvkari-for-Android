@@ -254,6 +254,8 @@ fun SettingsSheet(
                             coroutineScope.launch {
                                 Recorder.clear()
                                 repository.clearAllMessage()
+                                Config.tokens=0
+                                Config.msgCount=0
                                 SnackbarManager.show("清除完成")
                             }
                         }
