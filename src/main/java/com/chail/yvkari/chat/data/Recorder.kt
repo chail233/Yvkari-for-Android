@@ -1,7 +1,12 @@
 package com.chail.yvkari.chat.data
 
+import android.content.Context
+import android.content.SharedPreferences
+import androidx.core.content.edit
 import com.chail.yvkari.Config
+import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
+import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
@@ -15,13 +20,19 @@ data class Record(
 object Recorder {
     private val data: MutableList<Record> = mutableListOf()
     private val mutex = Mutex()//防止并发操作引发bug
+    private val gson = Gson()
+    private lateinit var sp: SharedPreferences
 
+    fun init(context: Context){
+        this.sp = context.getSharedPreferences("record", Context.MODE_PRIVATE)
+    }
     suspend fun push(msg: Record) {
         mutex.withLock {
             val lim = Config.recordLimit
             while (data.size > lim) data.removeAt(0)
             data.add(msg)
         }
+        save()
     }
 
     suspend fun getList(): List<Record> = mutex.withLock {
@@ -33,4 +44,16 @@ object Recorder {
             data.clear()
         }
     }
+
+    fun save(){
+        val dataStr = gson.toJson(data)
+        sp.edit { putString("records", dataStr) }
+    }
+
+    fun load(){
+        val dataStr = sp.getString("records", "[]")?:"[]"
+        val type = TypeToken.getParameterized(List::class.java, Record::class.java).type
+        return gson.fromJson(dataStr, type)
+    }
+
 }
