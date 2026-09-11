@@ -49,6 +49,7 @@ import com.chail.yvkari.getTime
 import com.chail.yvkari.parse
 import com.chail.yvkari.ui.components.AvatarCircle
 import com.chail.yvkari.ui.components.ChatBubble
+import com.chail.yvkari.ui.components.DashboardSheet
 import com.chail.yvkari.ui.components.InputBar
 import com.chail.yvkari.ui.components.SettingsSheet
 import com.chail.yvkari.ui.components.TypingBubble
@@ -70,6 +71,7 @@ fun ChatPage() {
     val messageList by msgFlow.collectAsState(emptyList())
     var loading by remember { mutableStateOf(false) }
     var showSettings by remember { mutableStateOf(false) }
+    var showDashboard by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
     val listState = rememberLazyListState()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -92,6 +94,7 @@ fun ChatPage() {
         Column(modifier = Modifier.fillMaxSize().padding(innerPadding).background(YukariBackground)) {
             // ── Top Bar ──
             YukariTopBar(
+                onDashboardClick = { showDashboard = true },
                 onSettingsClick = { showSettings = true }
             )
 
@@ -213,6 +216,12 @@ fun ChatPage() {
                 enabled = !loading
             )
         }
+
+        // ── Dashboard Panel (overlay, no innerPadding)
+        DashboardSheet(
+            visible = showDashboard,
+            onDismiss = { showDashboard = false }
+        )
 
         // ── Settings Panel (overlay, no innerPadding)
         SettingsSheet(
