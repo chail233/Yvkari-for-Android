@@ -27,4 +27,10 @@ object Recorder {
     suspend fun getList(): List<Record> = mutex.withLock {
         data.toList()
     }
+
+    suspend fun clear(){
+        mutex.withLock{
+            data.clear()
+        }
+    }
 }

@@ -20,6 +20,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -32,6 +33,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,11 +45,15 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.chail.yvkari.Config
+import com.chail.yvkari.chat.data.MessageRepository
+import com.chail.yvkari.chat.data.Recorder
+import kotlinx.coroutines.launch
 
 @Composable
 fun SettingsSheet(
     visible: Boolean,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    repository: MessageRepository
 ) {
     // 每个字段用 Compose state 持有，保证输入流畅，变更同时写回 SharedPreferences
     var baseUrl by remember(visible) { mutableStateOf(Config.baseUrl) }
@@ -55,6 +61,8 @@ fun SettingsSheet(
     var model by remember(visible) { mutableStateOf(Config.model) }
     var recordLimit by remember(visible) { mutableStateOf(Config.recordLimit.toFloat()) }
     var apiKeyVisible by remember { mutableStateOf(false) }
+    var debugMode by remember { mutableStateOf(Config.debugMode) }
+    val coroutineScope = rememberCoroutineScope()
 
     AnimatedVisibility(
         visible = visible,
@@ -224,14 +232,34 @@ fun SettingsSheet(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Spacer(Modifier.height(6.dp))
-                    var isChecked by remember { mutableStateOf(false) }
                     Switch(
-                        checked = isChecked,
+                        checked = debugMode,
                         onCheckedChange = {
-                            isChecked = it
+                            debugMode = it
                             Config.debugMode = it
                         }
                     )
+
+                    Spacer(Modifier.height(24.dp))
+
+                    Text(
+                        text = "清空历史消息",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(Modifier.height(6.dp))
+                    Button(
+                        onClick = {
+                            coroutineScope.launch {
+                                Recorder.clear()
+                                repository.clearAllMessage()
+                            }
+                        }
+                    ) {
+                        Text(
+                            text = "清除历史消息"
+                        )
+                    }
                 }
             }
         }

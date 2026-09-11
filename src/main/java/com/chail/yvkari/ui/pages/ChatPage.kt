@@ -203,7 +203,8 @@ fun ChatPage() {
         // ── Settings Panel
         SettingsSheet(
             visible = showSettings,
-            onDismiss = { showSettings = false }
+            onDismiss = { showSettings = false },
+            repository = repo
         )
     }
 }
