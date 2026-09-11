@@ -18,7 +18,7 @@ data class Record(
 )
 
 object Recorder {
-    private val data: MutableList<Record> = mutableListOf()
+    private var data: MutableList<Record> = mutableListOf()
     private val mutex = Mutex()//防止并发操作引发bug
     private val gson = Gson()
     private lateinit var sp: SharedPreferences
@@ -43,6 +43,7 @@ object Recorder {
         mutex.withLock{
             data.clear()
         }
+        save()
     }
 
     fun save(){
@@ -53,7 +54,7 @@ object Recorder {
     fun load(){
         val dataStr = sp.getString("records", "[]")?:"[]"
         val type = TypeToken.getParameterized(List::class.java, Record::class.java).type
-        return gson.fromJson(dataStr, type)
+        data =  gson.fromJson(dataStr, type)
     }
 
 }
