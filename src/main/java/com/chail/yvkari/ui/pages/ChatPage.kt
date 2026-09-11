@@ -13,6 +13,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -28,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.chail.yvkari.Config
 import com.chail.yvkari.chat.api.ChatResponse
 import com.chail.yvkari.chat.api.MessageContent
 import com.chail.yvkari.chat.api.getReply
@@ -50,6 +54,7 @@ import com.chail.yvkari.ui.components.SettingsSheet
 import com.chail.yvkari.ui.components.TypingBubble
 import com.chail.yvkari.ui.components.WelcomeScreen
 import com.chail.yvkari.ui.theme.YukariBackground
+import com.chail.yvkari.ui.components.SnackbarManager
 import com.chail.yvkari.ui.components.YukariTopBar
 import com.google.gson.Gson
 import kotlinx.coroutines.delay
@@ -67,6 +72,10 @@ fun ChatPage() {
     var showSettings by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
     val listState = rememberLazyListState()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    // Assign to global manager so composables can trigger show()
+    SnackbarManager.hostState = snackbarHostState
 
     // Auto-scroll to bottom when new messages arrive
     LaunchedEffect(messageList.size) {
@@ -76,8 +85,11 @@ fun ChatPage() {
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        Column(modifier = Modifier.fillMaxSize().background(YukariBackground)) {
+    Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+        containerColor = YukariBackground
+    ) { innerPadding ->
+        Column(modifier = Modifier.fillMaxSize().padding(innerPadding).background(YukariBackground)) {
             // ── Top Bar ──
             YukariTopBar(
                 onSettingsClick = { showSettings = true }
@@ -182,7 +194,7 @@ fun ChatPage() {
                                 }
                             } catch (e: Exception) {
                                 println("网络请求错误${e.message}")
-                                repo.insertMessage(
+                                if(Config.debugMode) repo.insertMessage(
                                     Message(
                                         role = Role.Ai,
                                         content = getFullException(e),
@@ -200,7 +212,7 @@ fun ChatPage() {
             )
         }
 
-        // ── Settings Panel
+        // ── Settings Panel (overlay, no innerPadding)
         SettingsSheet(
             visible = showSettings,
             onDismiss = { showSettings = false },

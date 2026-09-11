@@ -64,6 +64,7 @@ fun SettingsSheet(
     var debugMode by remember { mutableStateOf(Config.debugMode) }
     val coroutineScope = rememberCoroutineScope()
 
+
     AnimatedVisibility(
         visible = visible,
         enter = slideInHorizontally { it },
@@ -253,6 +254,7 @@ fun SettingsSheet(
                             coroutineScope.launch {
                                 Recorder.clear()
                                 repository.clearAllMessage()
+                                SnackbarManager.show("清除完成")
                             }
                         }
                     ) {
