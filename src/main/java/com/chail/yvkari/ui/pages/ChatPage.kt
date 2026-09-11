@@ -180,6 +180,7 @@ fun ChatPage() {
                                     think = reply.think,
                                     tokens = res.usage.total_tokens
                                 )
+                                Config.tokens += aiMsg.tokens
                                 Recorder.push(replyStr)
                                 for (it in aiMsg.content) {
                                     delay(2000.milliseconds)
@@ -191,6 +192,7 @@ fun ChatPage() {
                                             timeStamp = System.currentTimeMillis()
                                         )
                                     )
+                                    Config.msgCount++
                                 }
                             } catch (e: Exception) {
                                 println("网络请求错误${e.message}")

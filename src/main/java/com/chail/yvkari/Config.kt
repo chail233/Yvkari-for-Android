@@ -30,4 +30,12 @@ object Config {
     var debugMode: Boolean
         get() = sp.getBoolean("debug_mode", false)
         set(value) = sp.edit { putBoolean("debug_mode", value) }
+
+    var tokens: Long
+        get() = sp.getLong("tokens", 0)
+        set(value) = sp.edit { putLong("tokens", value) }
+
+    var msgCount: Int //ai消息条数
+        get() = sp.getInt("msg_count", 0)
+        set(value) = sp.edit{ putInt("msg_count", value)}
 }
