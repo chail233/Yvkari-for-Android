@@ -25,6 +25,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -215,10 +216,21 @@ fun SettingsSheet(
                         )
                     }
 
+                    Spacer(Modifier.height(24.dp))
+
                     Text(
-                        text = "调试模式",
+                        text = "输出调试信息",
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(Modifier.height(6.dp))
+                    var isChecked by remember { mutableStateOf(false) }
+                    Switch(
+                        checked = isChecked,
+                        onCheckedChange = {
+                            isChecked = it
+                            Config.debugMode = it
+                        }
                     )
                 }
             }

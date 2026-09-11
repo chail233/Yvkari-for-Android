@@ -26,4 +26,8 @@ object Config {
     var recordLimit: Int//对话轮数上限
         get() = sp.getInt("record_limit", 20)
         set(value) = sp.edit {putInt("record_limit", value)}
+
+    var debugMode: Boolean
+        get() = sp.getBoolean("debug_mode", false)
+        set(value) = sp.edit { putBoolean("debug_mode", value) }
 }
