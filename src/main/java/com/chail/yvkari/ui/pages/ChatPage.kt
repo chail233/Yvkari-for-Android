@@ -76,10 +76,53 @@ fun ChatPage() {
     val listState = rememberLazyListState()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    // Assign to global manager so composables can trigger show()
     SnackbarManager.hostState = snackbarHostState
 
-    // Auto-scroll to bottom when new messages arrive
+
+    suspend fun aiReply(){
+        loading = true
+        try {
+            val res: ChatResponse = getReply()
+            val replyStr = res.choices[0].message
+            val reply = parse(replyStr.content, MessageContent::class.java)
+                ?: throw Exception("无法解析返回内容")
+            val aiMsg = AIMsg(
+                time = getFullTime(),
+                content = reply.contents,
+                think = reply.think,
+                tokens = res.usage.total_tokens
+            )
+            Config.tokens += aiMsg.tokens
+            Recorder.push(replyStr)
+            for (it in aiMsg.content) {
+                delay(2000.milliseconds)
+                repo.insertMessage(
+                    Message(
+                        role = Role.Ai,
+                        content = it.content,
+                        time = getTime(aiMsg.time),
+                        timeStamp = System.currentTimeMillis()
+                    )
+                )
+                Config.msgCount++
+            }
+        } catch (e: Exception) {
+            println("网络请求错误${e.message}")
+            if(Config.debugMode) repo.insertMessage(
+                Message(
+                    role = Role.Ai,
+                    content = getFullException(e),
+                    time = getTime(getFullTime()),
+                    timeStamp = System.currentTimeMillis()
+                )
+            )
+        } finally {
+            loading = false
+        }
+    }
+
+
+
     LaunchedEffect(messageList.size) {
         if (messageList.isNotEmpty()) {
             delay(100.milliseconds)
@@ -171,49 +214,11 @@ fun ChatPage() {
                                 time = getTime(userMsg.time),
                                 timeStamp = System.currentTimeMillis()
                             ))
-                            loading = true
-                            try {
-                                val res: ChatResponse = getReply()
-                                val replyStr = res.choices[0].message
-                                val reply = parse(replyStr.content, MessageContent::class.java)
-                                    ?: throw Exception("无法解析返回内容")
-                                val aiMsg = AIMsg(
-                                    time = getFullTime(),
-                                    content = reply.contents,
-                                    think = reply.think,
-                                    tokens = res.usage.total_tokens
-                                )
-                                Config.tokens += aiMsg.tokens
-                                Recorder.push(replyStr)
-                                for (it in aiMsg.content) {
-                                    delay(2000.milliseconds)
-                                    repo.insertMessage(
-                                        Message(
-                                            role = Role.Ai,
-                                            content = it.content,
-                                            time = getTime(aiMsg.time),
-                                            timeStamp = System.currentTimeMillis()
-                                        )
-                                    )
-                                    Config.msgCount++
-                                }
-                            } catch (e: Exception) {
-                                println("网络请求错误${e.message}")
-                                if(Config.debugMode) repo.insertMessage(
-                                    Message(
-                                        role = Role.Ai,
-                                        content = getFullException(e),
-                                        time = getTime(getFullTime()),
-                                        timeStamp = System.currentTimeMillis()
-                                    )
-                                )
-                            } finally {
-                                loading = false
-                            }
+                            aiReply()
                         }
                     }
                 },
-                enabled = !loading
+                enabled = true
             )
         }
 
@@ -230,4 +235,7 @@ fun ChatPage() {
             repository = repo
         )
     }
+
+
 }
+

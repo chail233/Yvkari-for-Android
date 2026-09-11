@@ -63,6 +63,7 @@ fun SettingsSheet(
     var apiKeyVisible by remember { mutableStateOf(false) }
     var debugMode by remember { mutableStateOf(Config.debugMode) }
     val coroutineScope = rememberCoroutineScope()
+    var delay by remember { mutableStateOf(Config.delay) }
 
 
     AnimatedVisibility(
@@ -220,6 +221,48 @@ fun SettingsSheet(
                         )
                         Text(
                             "100",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+
+
+                    Spacer(Modifier.height(24.dp))
+
+                    // 回复延迟
+                    Text(
+                        text = "AI回复延迟",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        text = "$delay ms",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Slider(
+                        value = delay.toFloat(),
+                        onValueChange = {
+                            delay = it.toLong()
+                            Config.delay = it.toLong()
+                        },
+                        valueRange = 5000f..20000f,
+                        steps = 14,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            "5000",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            "20000",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )

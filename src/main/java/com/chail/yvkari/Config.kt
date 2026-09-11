@@ -38,4 +38,8 @@ object Config {
     var msgCount: Int //ai消息条数
         get() = sp.getInt("msg_count", 0)
         set(value) = sp.edit{ putInt("msg_count", value)}
+
+    var delay: Long
+        get() = sp.getLong("delay", 10000)
+        set(value) = sp.edit { putLong("delay", value) }
 }
