@@ -1,7 +1,5 @@
 package com.chail.yvkari.chat.api
 import com.chail.yvkari.Config
-import com.chail.yvkari.ConfigDev
-import com.chail.yvkari.DEV
 import com.chail.yvkari.chat.data.Record
 import com.chail.yvkari.chat.data.Recorder
 import retrofit2.Retrofit
@@ -18,7 +16,7 @@ import java.util.concurrent.TimeUnit as JTimeUnit
 class AuthInterceptor: Interceptor{
     override fun intercept(chain: Interceptor.Chain): Response {
         val originalRequest = chain.request()
-        val key = if(DEV) ConfigDev.apiKey else Config.apiKey
+        val key = Config.apiKey
         val newRequest = originalRequest.newBuilder()
             .header("Authorization", "Bearer $key")
             .header("Content-Type", "application/json")
@@ -40,7 +38,7 @@ val Client = OkHttpClient.Builder()
 
 
 val retrofit: Retrofit = Retrofit.Builder()
-    .baseUrl(if(DEV) ConfigDev.baseUrl else Config.baseUrl)
+    .baseUrl(Config.baseUrl)
     .client(Client)
     .addConverterFactory(GsonConverterFactory.create())
     .build()
@@ -54,7 +52,7 @@ suspend fun getReply(): ChatResponse{
         msgs.add(record)
     }
     val req = ReplyRequest(
-        model = if(DEV) ConfigDev.model else Config.model,
+        model = Config.model,
         messages = msgs,
         temperature = 0.3f,
         enable_search = true,

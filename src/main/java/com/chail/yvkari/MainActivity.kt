@@ -10,7 +10,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Config.init(this)//全局配置
-        ConfigDev.init(this)
         setContent {
             YvkariTheme {
                 ChatPage()
@@ -18,4 +17,3 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-const val DEV = false//是否处于开发模式

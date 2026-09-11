@@ -1,13 +1,14 @@
 package com.chail.yvkari.chat.data
 
 import com.chail.yvkari.Config
-import com.chail.yvkari.ConfigDev
-import com.chail.yvkari.DEV
+import com.google.gson.annotations.SerializedName
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
 data class Record(
+    @SerializedName("role")
     val role: String,
+    @SerializedName("content")//防止被混淆
     val content: String
 )
 
@@ -17,7 +18,7 @@ object Recorder {
 
     suspend fun push(msg: Record) {
         mutex.withLock {
-            val lim = if (DEV) ConfigDev.recordLimit else Config.recordLimit
+            val lim = Config.recordLimit
             while (data.size > lim) data.removeAt(0)
             data.add(msg)
         }
