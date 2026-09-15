@@ -18,6 +18,7 @@ import com.chail.yvkari.chat.data.UserMsg
 import com.chail.yvkari.getFullException
 import com.chail.yvkari.getFullTime
 import com.chail.yvkari.getTime
+import com.chail.yvkari.memory.addMemory
 import com.chail.yvkari.parse
 import com.google.gson.Gson
 import kotlinx.coroutines.delay
@@ -63,6 +64,10 @@ class ChatViewModel : ViewModel(){
                         aiReply()
                     }
                     timer = 0
+                    if(Recorder.getMemSize()>= Config.recordLimit){
+                        addMemory()
+                        Recorder.clearMem()
+                    }
                 }
             }
         }

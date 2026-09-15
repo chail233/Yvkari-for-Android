@@ -19,6 +19,7 @@ data class Record(
 
 object Recorder {
     private var data: MutableList<Record> = mutableListOf()
+    private var memoryBuff = mutableListOf<Record>()
     private val mutex = Mutex()//防止并发操作引发bug
     private val gson = Gson()
     private lateinit var sp: SharedPreferences
@@ -29,7 +30,10 @@ object Recorder {
     suspend fun push(msg: Record) {
         mutex.withLock {
             val lim = Config.recordLimit
-            while (data.size > lim) data.removeAt(0)
+            while (data.size > lim) {
+                memoryBuff.add(data[0])
+                data.removeAt(0)
+            }
             data.add(msg)
         }
         save()
@@ -38,7 +42,17 @@ object Recorder {
     suspend fun getList(): List<Record> = mutex.withLock {
         data.toList()
     }
-
+    suspend fun getMem(): List<Record> = mutex.withLock {
+        memoryBuff.toList()
+    }
+    fun getMemSize(): Int{
+        return memoryBuff.size
+    }
+    suspend fun clearMem(){
+        mutex.withLock {
+            memoryBuff.clear()
+        }
+    }
     suspend fun clear(){
         mutex.withLock{
             data.clear()
@@ -48,13 +62,17 @@ object Recorder {
 
     fun save(){
         val dataStr = gson.toJson(data)
+        val memStr = gson.toJson(memoryBuff)
         sp.edit { putString("records", dataStr) }
+        sp.edit{putString("memory_buff", memStr)}
     }
 
     fun load(){
         val dataStr = sp.getString("records", "[]")?:"[]"
+        val memStr = sp.getString("memory_buff", "[]")?:"[]"
         val type = TypeToken.getParameterized(List::class.java, Record::class.java).type
         data =  gson.fromJson(dataStr, type)
+        memoryBuff = gson.fromJson(memStr, type)
     }
 
 }

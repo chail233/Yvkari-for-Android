@@ -2,6 +2,7 @@ package com.chail.yvkari.chat.api
 import com.chail.yvkari.Config
 import com.chail.yvkari.chat.data.Record
 import com.chail.yvkari.chat.data.Recorder
+import com.chail.yvkari.memory.queryMemory
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import kotlinx.coroutines.Dispatchers
@@ -50,6 +51,17 @@ suspend fun getReply(): ChatResponse{
     msgs.add(prompt)
     for (record in Recorder.getList()){
         msgs.add(record)
+    }
+    val memories = withContext(Dispatchers.IO){
+        queryMemory()
+    }
+    if(!memories.isEmpty()){
+        var memContent = ""
+        for(it in memories){
+            memContent += "$it;"
+        }
+        val mem = Record(role = "system", content = "记忆召回结果：$memContent")
+        msgs.add(mem)
     }
     val req = ReplyRequest(
         model = Config.model,

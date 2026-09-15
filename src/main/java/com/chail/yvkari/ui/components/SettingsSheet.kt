@@ -189,13 +189,13 @@ fun SettingsSheet(
 
                     // ── 对话轮数上限 ──
                     Text(
-                        text = "对话轮数上限",
+                        text = "对话记录窗口大小",
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Spacer(Modifier.height(4.dp))
                     Text(
-                        text = "${recordLimit.toInt()} 轮",
+                        text = "${recordLimit.toInt()} 次",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Medium,
                         color = MaterialTheme.colorScheme.primary
