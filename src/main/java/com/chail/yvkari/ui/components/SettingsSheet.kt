@@ -237,7 +237,7 @@ fun SettingsSheet(
                     )
                     Spacer(Modifier.height(4.dp))
                     Text(
-                        text = "$delay ms",
+                        text = "$delay s",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Medium,
                         color = MaterialTheme.colorScheme.primary
@@ -248,7 +248,7 @@ fun SettingsSheet(
                             delay = it.toLong()
                             Config.delay = it.toLong()
                         },
-                        valueRange = 5000f..20000f,
+                        valueRange = 5f..20f,
                         steps = 14,
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -257,12 +257,12 @@ fun SettingsSheet(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(
-                            "5000",
+                            "5",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Text(
-                            "20000",
+                            "20",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )

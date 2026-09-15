@@ -25,28 +25,13 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.chail.yvkari.Config
-import com.chail.yvkari.chat.api.ChatResponse
-import com.chail.yvkari.chat.api.MessageContent
-import com.chail.yvkari.chat.api.getReply
-import com.chail.yvkari.chat.data.AIMsg
-import com.chail.yvkari.chat.data.Message
-import com.chail.yvkari.chat.data.MessageRepository
-import com.chail.yvkari.chat.data.MsgContent
-import com.chail.yvkari.chat.data.Record
-import com.chail.yvkari.chat.data.Recorder
-import com.chail.yvkari.chat.data.Role
-import com.chail.yvkari.chat.data.UserMsg
-import com.chail.yvkari.getFullException
-import com.chail.yvkari.getFullTime
-import com.chail.yvkari.getTime
-import com.chail.yvkari.parse
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.chail.yvkari.ui.components.AvatarCircle
 import com.chail.yvkari.ui.components.ChatBubble
 import com.chail.yvkari.ui.components.DashboardSheet
@@ -57,70 +42,25 @@ import com.chail.yvkari.ui.components.WelcomeScreen
 import com.chail.yvkari.ui.theme.YukariBackground
 import com.chail.yvkari.ui.components.SnackbarManager
 import com.chail.yvkari.ui.components.YukariTopBar
-import com.google.gson.Gson
+import com.chail.yvkari.ui.viewmodel.ChatViewModel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 fun ChatPage() {
     val ctx = LocalContext.current.applicationContext
-    val repo = remember { MessageRepository(ctx) }
-    val msgFlow =repo.observeAllMessages()
+    val chatViewModel: ChatViewModel = viewModel()
+    chatViewModel.initRepo(ctx)
+    val msgFlow = chatViewModel.getMsgFlow()
     var inputText by remember { mutableStateOf("") }
     val messageList by msgFlow.collectAsState(emptyList())
-    var loading by remember { mutableStateOf(false) }
     var showSettings by remember { mutableStateOf(false) }
     var showDashboard by remember { mutableStateOf(false) }
-    val coroutineScope = rememberCoroutineScope()
     val listState = rememberLazyListState()
     val snackbarHostState = remember { SnackbarHostState() }
+    val loading by chatViewModel.loading.collectAsStateWithLifecycle()
 
     SnackbarManager.hostState = snackbarHostState
-
-
-    suspend fun aiReply(){
-        loading = true
-        try {
-            val res: ChatResponse = getReply()
-            val replyStr = res.choices[0].message
-            val reply = parse(replyStr.content, MessageContent::class.java)
-                ?: throw Exception("无法解析返回内容")
-            val aiMsg = AIMsg(
-                time = getFullTime(),
-                content = reply.contents,
-                think = reply.think,
-                tokens = res.usage.total_tokens
-            )
-            Config.tokens += aiMsg.tokens
-            Recorder.push(replyStr)
-            for (it in aiMsg.content) {
-                delay(2000.milliseconds)
-                repo.insertMessage(
-                    Message(
-                        role = Role.Ai,
-                        content = it.content,
-                        time = getTime(aiMsg.time),
-                        timeStamp = System.currentTimeMillis()
-                    )
-                )
-                Config.msgCount++
-            }
-        } catch (e: Exception) {
-            println("网络请求错误${e.message}")
-            if(Config.debugMode) repo.insertMessage(
-                Message(
-                    role = Role.Ai,
-                    content = getFullException(e),
-                    time = getTime(getFullTime()),
-                    timeStamp = System.currentTimeMillis()
-                )
-            )
-        } finally {
-            loading = false
-        }
-    }
-
 
 
     LaunchedEffect(messageList.size) {
@@ -174,8 +114,6 @@ fun ChatPage() {
                             ChatBubble(msg)
                         }
                     }
-
-                    // Animated typing indicator inside the list
                     if (loading) {
                         item {
                             Row(
@@ -196,26 +134,13 @@ fun ChatPage() {
             // ── Input Bar ──
             InputBar(
                 inputText = inputText,
-                onValueChange = { inputText = it },
+                onValueChange = {
+                    inputText = it
+                                },
                 onSend = {
                     if (inputText.trim().isNotBlank()) {
-                        val userMsg = UserMsg(
-                            time = getFullTime(),
-                            content = MsgContent("text", inputText)
-                        )
-                        val textToSend = inputText
-                        val gson = Gson()
+                        chatViewModel.sendMessage(inputText)
                         inputText = ""
-                        coroutineScope.launch {
-                            Recorder.push(Record("user", gson.toJson(userMsg)))
-                            repo.insertMessage(Message(
-                                role = Role.User,
-                                content = textToSend,
-                                time = getTime(userMsg.time),
-                                timeStamp = System.currentTimeMillis()
-                            ))
-                            aiReply()
-                        }
                     }
                 },
                 enabled = true
@@ -232,10 +157,8 @@ fun ChatPage() {
         SettingsSheet(
             visible = showSettings,
             onDismiss = { showSettings = false },
-            repository = repo
+            repository = chatViewModel.getRepo()
         )
     }
-
-
 }
 

@@ -40,6 +40,6 @@ object Config {
         set(value) = sp.edit{ putInt("msg_count", value)}
 
     var delay: Long
-        get() = sp.getLong("delay", 10000)
+        get() = sp.getLong("delay", 10)
         set(value) = sp.edit { putLong("delay", value) }
 }
