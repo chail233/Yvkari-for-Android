@@ -44,6 +44,8 @@ fun DashboardSheet(
         if (msgCount > 0) totalTokens / msgCount else 0L
     }
 
+    val memCount = remember { Config.memCount }
+
     AnimatedVisibility(
         visible = visible,
         enter = slideInHorizontally { it },
@@ -114,6 +116,13 @@ fun DashboardSheet(
                     StatItem(
                         label = "每条平均 Token 消耗",
                         value = "$avgTokens"
+                    )
+
+                    Spacer(Modifier.height(20.dp))
+
+                    StatItem(
+                        label = "记忆条数",
+                        value = "$memCount"
                     )
                 }
             }

@@ -64,7 +64,7 @@ fun SettingsSheet(
     var debugMode by remember { mutableStateOf(Config.debugMode) }
     val coroutineScope = rememberCoroutineScope()
     var delay by remember { mutableStateOf(Config.delay) }
-
+    var userId by remember { mutableStateOf(Config.userId) }
 
     AnimatedVisibility(
         visible = visible,
@@ -182,7 +182,26 @@ fun SettingsSheet(
                         },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
-                        placeholder = { Text("gpt-4o") }
+                        placeholder = { Text("qwen3.7-flash") }
+                    )
+
+                    Spacer(Modifier.height(24.dp))
+
+                    Text(
+                        text = "用户名",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(Modifier.height(6.dp))
+                    OutlinedTextField(
+                        value = userId,
+                        onValueChange = {
+                            userId = it
+                            Config.userId = it
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        placeholder = { Text("chail") }
                     )
 
                     Spacer(Modifier.height(24.dp))

@@ -42,4 +42,12 @@ object Config {
     var delay: Long
         get() = sp.getLong("delay", 10)
         set(value) = sp.edit { putLong("delay", value) }
+
+    var userId: String
+        get() = sp.getString("user_id", "")?:""
+        set(value) = sp.edit { putString("user_id", value) }
+
+    var memCount: Int
+        get() = sp.getInt("mem_count", 0)
+        set(value) = sp.edit{ putInt("mem_count", value)}
 }
