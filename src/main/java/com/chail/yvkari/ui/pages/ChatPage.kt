@@ -36,6 +36,7 @@ import com.chail.yvkari.ui.components.AvatarCircle
 import com.chail.yvkari.ui.components.ChatBubble
 import com.chail.yvkari.ui.components.DashboardSheet
 import com.chail.yvkari.ui.components.InputBar
+import com.chail.yvkari.ui.components.LogSheet
 import com.chail.yvkari.ui.components.SettingsSheet
 import com.chail.yvkari.ui.components.TypingBubble
 import com.chail.yvkari.ui.components.WelcomeScreen
@@ -56,6 +57,7 @@ fun ChatPage() {
     val messageList by msgFlow.collectAsState(emptyList())
     var showSettings by remember { mutableStateOf(false) }
     var showDashboard by remember { mutableStateOf(false) }
+    var showLog by remember { mutableStateOf(false) }
     val listState = rememberLazyListState()
     val snackbarHostState = remember { SnackbarHostState() }
     val loading by chatViewModel.loading.collectAsStateWithLifecycle()
@@ -78,7 +80,8 @@ fun ChatPage() {
             // ── Top Bar ──
             YukariTopBar(
                 onDashboardClick = { showDashboard = true },
-                onSettingsClick = { showSettings = true }
+                onSettingsClick = { showSettings = true },
+                onLogClick = { showLog = true }
             )
 
             // ── Content Area ──
@@ -158,6 +161,12 @@ fun ChatPage() {
             visible = showSettings,
             onDismiss = { showSettings = false },
             repository = chatViewModel.getRepo()
+        )
+
+        // ── Log Panel (overlay, no innerPadding)
+        LogSheet(
+            visible = showLog,
+            onDismiss = { showLog = false }
         )
     }
 }

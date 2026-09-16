@@ -35,7 +35,8 @@ import com.chail.yvkari.ui.theme.YukariPrimary
 @Composable
 fun YukariTopBar(
     onDashboardClick: () -> Unit = {},
-    onSettingsClick: () -> Unit = {}
+    onSettingsClick: () -> Unit = {},
+    onLogClick: () -> Unit = {}
 ) {
     var showMenu by remember { mutableStateOf(false) }
 
@@ -102,6 +103,13 @@ fun YukariTopBar(
                         onClick = {
                             showMenu = false
                             onDashboardClick()
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("日志") },
+                        onClick = {
+                            showMenu = false
+                            onLogClick()
                         }
                     )
                     DropdownMenuItem(
