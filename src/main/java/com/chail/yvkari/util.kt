@@ -3,6 +3,8 @@ package com.chail.yvkari
 import com.google.gson.Gson
 import retrofit2.HttpException
 import java.text.SimpleDateFormat
+import java.time.Instant
+import java.time.ZoneId
 import java.util.Date
 import java.util.Locale
 
@@ -46,4 +48,10 @@ fun getFullException(e: Throwable) : String{
             return ("==== EXCEPTION ====")+("完整堆栈:\n${e.stackTraceToString()}")
         }
     }
+}
+
+fun getTimeFromSecondStamp(stamp: Long): String{
+    val instant = Instant.ofEpochSecond(stamp)
+    val localDateTime = instant.atZone(ZoneId.systemDefault()).toLocalDateTime()
+    return localDateTime.toString()
 }
