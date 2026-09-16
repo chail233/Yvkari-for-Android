@@ -2,7 +2,8 @@ package com.chail.yvkari.chat.data
 
 enum class Role{
     User,
-    Ai
+    Ai,
+    AiThink
 }
 data class MsgContent(
     val type: String,

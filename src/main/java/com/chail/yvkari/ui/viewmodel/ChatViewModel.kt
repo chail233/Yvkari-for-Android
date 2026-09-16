@@ -104,6 +104,12 @@ class ChatViewModel : ViewModel(){
             )
             Config.tokens += aiMsg.tokens
             Recorder.push(replyStr)
+            repo.insertMessage(Message(
+                role = Role.AiThink,
+                content = aiMsg.think,
+                time = getTime(aiMsg.time),
+                timeStamp = System.currentTimeMillis()
+            ))
             for (it in aiMsg.content) {
                 delay(2000.milliseconds)
                 repo.insertMessage(
