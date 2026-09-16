@@ -45,6 +45,7 @@ import com.chail.yvkari.ui.components.SnackbarManager
 import com.chail.yvkari.ui.components.YukariTopBar
 import com.chail.yvkari.ui.viewmodel.ChatViewModel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.asStateFlow
 import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
@@ -53,7 +54,7 @@ fun ChatPage() {
     val chatViewModel: ChatViewModel = viewModel()
     chatViewModel.initRepo(ctx)
     val msgFlow = chatViewModel.getMsgFlow()
-    var inputText by remember { mutableStateOf("") }
+    val inputTextState = chatViewModel.inputText.asStateFlow().collectAsStateWithLifecycle()
     val messageList by msgFlow.collectAsState(emptyList())
     var showSettings by remember { mutableStateOf(false) }
     var showDashboard by remember { mutableStateOf(false) }
@@ -136,14 +137,14 @@ fun ChatPage() {
 
             // ── Input Bar ──
             InputBar(
-                inputText = inputText,
+                inputText = inputTextState.value,
                 onValueChange = {
-                    inputText = it
+                    chatViewModel.inputText.value = it
+                    chatViewModel.resetTimer()
                                 },
                 onSend = {
-                    if (inputText.trim().isNotBlank()) {
-                        chatViewModel.sendMessage(inputText)
-                        inputText = ""
+                    if (inputTextState.value.trim().isNotBlank()) {
+                        chatViewModel.sendMessage()
                     }
                 },
                 enabled = true

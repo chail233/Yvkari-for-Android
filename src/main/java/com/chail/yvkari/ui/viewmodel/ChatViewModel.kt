@@ -37,6 +37,9 @@ class ChatViewModel : ViewModel(){
     private var _loading = MutableStateFlow(false)
     val loading : StateFlow<Boolean> = _loading.asStateFlow()
 
+    var inputText = MutableStateFlow("")
+
+
     private val messageBuff = mutableListOf<UserMsg>()
     public fun getRepo(): MessageRepository{
         return repo
@@ -53,6 +56,7 @@ class ChatViewModel : ViewModel(){
             while (true){
                 delay(1000.milliseconds)
                 timer++
+                if(inputText.value!="") resetTimer()
                 if(timer>= Config.delay){
                     if(!messageBuff.isEmpty()){
                         val gson = Gson()
@@ -72,8 +76,12 @@ class ChatViewModel : ViewModel(){
         }
     }
 
-
-    public fun sendMessage(text: String){
+    fun resetTimer(){
+        timer=0
+    }
+    public fun sendMessage(){
+        val text = inputText.value
+        inputText.value = ""
         val userMsg = UserMsg(
             time = getFullTime(),
             content = MsgContent("text", text)
