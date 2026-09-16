@@ -16,6 +16,7 @@ suspend fun addMemory(){
         memoryApi.AddMemory(body)
     }
     Config.memCount += res.memory_nodes.size
+    Recorder.clearMem()
 }
 
 suspend fun queryMemory(): List<String>{

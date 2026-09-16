@@ -66,7 +66,6 @@ class ChatViewModel : ViewModel(){
                     timer = 0
                     if(Recorder.getMemSize()>= Config.recordLimit){
                         addMemory()
-                        Recorder.clearMem()
                     }
                 }
             }
