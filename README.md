@@ -1,10 +1,6 @@
 # Yvkari — 由加莉
 
 <p align="center">
-  <img src="app/src/main/res/drawable/ic_launcher_foreground.png" alt="Yvkari" width="120"/>
-</p>
-
-<p align="center">
   <strong>与由加莉（Yukari）聊天的智能 AI 助手 · Android</strong>
 </p>
 
@@ -218,15 +214,3 @@ app/
 欢迎提交 Issue 和 PR！如果你有好的想法或发现了 bug，请先开 issue 讨论。
 
 ---
-
-## 📄 许可证
-
-[MIT License](LICENSE)
-
----
-
-## 🙏 致谢
-
-- 由加莉的角色灵感来源于《公主连结 Re:Dive》中的 **由加莉（Yukari）**
-- 感谢 Jetpack Compose 和 Material 3 提供的优秀 UI 框架
-- 感谢所有开源依赖的维护者
