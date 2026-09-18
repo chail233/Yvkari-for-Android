@@ -1,6 +1,7 @@
 package com.chail.yvkari.memory
 
 import com.chail.yvkari.Config
+import com.chail.yvkari.chat.data.Record
 import com.chail.yvkari.chat.data.Recorder
 import com.chail.yvkari.debug.Logger
 import com.chail.yvkari.getTimeFromSecondStamp
@@ -11,7 +12,7 @@ suspend fun addMemory(){
     if(Recorder.getMidMem()=="") return
     val body = AddBody(
         user_id = Config.userId,
-        custom_content = Recorder.getMidMem(),
+        messages = listOf(Record(role = "user", content = "[对话摘要]${Recorder.getMidMem()}")),
     )
     Logger.add("记忆添加请求：$body")
     val res = withContext(Dispatchers.IO){
