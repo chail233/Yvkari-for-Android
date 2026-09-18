@@ -16,6 +16,7 @@ import com.chail.yvkari.chat.data.Record
 import com.chail.yvkari.chat.data.Recorder
 import com.chail.yvkari.chat.data.Role
 import com.chail.yvkari.chat.data.UserMsg
+import com.chail.yvkari.debug.Logger
 import com.chail.yvkari.getFullException
 import com.chail.yvkari.getFullTime
 import com.chail.yvkari.getTime
@@ -72,6 +73,7 @@ class ChatViewModel : ViewModel(){
                     if(Recorder.getMemSize()>= Config.recordLimit){
                         addMemory()
                         Recorder.setMidmem(summaryMem())
+                        Logger.add("中期记忆总结：${Recorder.getMidMem()}")
                         Recorder.clearMem()
                     }
                 }

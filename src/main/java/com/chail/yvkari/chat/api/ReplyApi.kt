@@ -2,6 +2,7 @@ package com.chail.yvkari.chat.api
 import com.chail.yvkari.Config
 import com.chail.yvkari.chat.data.Record
 import com.chail.yvkari.chat.data.Recorder
+import com.chail.yvkari.debug.Logger
 import com.chail.yvkari.memory.queryMemory
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -72,6 +73,7 @@ suspend fun getReply(): ChatResponse{
         temperature = 0.3f,
         enable_search = true,
     )
+    Logger.add("获取模型回复请求：$req")
     return withContext(Dispatchers.IO){
         replyApi.getReply(req)
     }
