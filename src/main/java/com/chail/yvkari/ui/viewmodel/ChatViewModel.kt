@@ -7,6 +7,7 @@ import com.chail.yvkari.Config
 import com.chail.yvkari.chat.api.ChatResponse
 import com.chail.yvkari.chat.api.MessageContent
 import com.chail.yvkari.chat.api.getReply
+import com.chail.yvkari.chat.api.summaryMem
 import com.chail.yvkari.chat.data.AIMsg
 import com.chail.yvkari.chat.data.Message
 import com.chail.yvkari.chat.data.MessageRepository
@@ -70,6 +71,8 @@ class ChatViewModel : ViewModel(){
                     timer = 0
                     if(Recorder.getMemSize()>= Config.recordLimit){
                         addMemory()
+                        Recorder.setMidmem(summaryMem())
+                        Recorder.clearMem()
                     }
                 }
             }

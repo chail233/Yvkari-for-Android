@@ -48,7 +48,10 @@ val replyApi: ReplyApiService = retrofit.create(ReplyApiService::class.java)
 
 suspend fun getReply(): ChatResponse{
     val msgs: MutableList<Record> = mutableListOf()
-    msgs.add(prompt)
+    msgs.add(replyPrompt)
+    if(Recorder.getMidMem()!=""){
+        msgs.add(Record(role = "system", content = "之前的几次对话内容概括：${Recorder.getMidMem()}"))
+    }
     for (record in Recorder.getList()){
         msgs.add(record)
     }
@@ -73,7 +76,25 @@ suspend fun getReply(): ChatResponse{
         replyApi.getReply(req)
     }
 }
-val prompt = Record(
+
+suspend fun summaryMem(): String{
+    val msgs = mutableListOf<Record>()
+    msgs.add(summaryPrompt)
+    for(it in Recorder.getMem()){
+        msgs.add(it)
+    }
+    val req = ReplyRequest(
+        model = Config.model,
+        temperature = 0.2f,
+        enable_search = false,
+        messages = msgs
+    )
+    return withContext(Dispatchers.IO){
+        replyApi.getReply(req).choices[0].message.content
+    }
+}
+
+val replyPrompt = Record(
     role = "system",
     content = "场景设定：" +
             "你正通过线上聊天软件，和用户一对一私信聊天，所有回复都要贴合线上发消息的真实状态，尤其注意不要一次回复很多，以单条短消息为主。\n" +
@@ -108,4 +129,14 @@ val prompt = Record(
             "数组内的消息将从前往后发送，数组可以为空代表不回复。请你根据具体情境决定消息发多少条，怎么去分隔，从而模拟现实里发消息的行为。" +
             "think字段的值代表角色本次回复时内心在想什么，用来记录角色心理活动。注意内心想法需要和行为相符，同时合情合理。在构造回复时也要参考以往的内心想法。\n" +
             "文本消息最后不要加句号。\n"
+)
+
+val summaryPrompt = Record(
+    role = "system",
+    content = "以下是与用户的一段对话记录，已经是结构化的JSON信息，你需要总结这段对话，要求如下：" +
+            "1.要完整概括对话的内容，包括发生了什么，说了什么等等" +
+            "2.信息要准确无误，不许编造信息" +
+            "3.要去除无用信息，只保留有用信息，如做了什么，用户表达了什么，内心想法等等" +
+            "4.只输出字符串文本，不要包含其他结构化信息。" +
+            "5.长度适中，不用很长把所有细节都保留下来。"
 )

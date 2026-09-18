@@ -18,7 +18,7 @@ data class SearchMemoryNode(
 )
 data class AddBody(
     val user_id: String,
-    val messages: List<Record>,
+    val custom_content: String,
     val memory_library_id: String = "5745f810bd324ae0894137da51dc57bf"
 )
 
