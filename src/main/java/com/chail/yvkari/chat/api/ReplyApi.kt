@@ -82,9 +82,16 @@ suspend fun getReply(): ChatResponse{
 suspend fun summaryMem(): String{
     val msgs = mutableListOf<Record>()
     msgs.add(summaryPrompt)
+    var memContent = ""
     for(it in Recorder.getMem()){
-        msgs.add(it)
+        if(it.role=="user"){
+            memContent += "用户：${it.content}\n"
+        }
+        else {
+            memContent += "我：${it.content}\n"
+        }
     }
+    msgs.add(Record(role = "user", content = memContent))
     val req = ReplyRequest(
         model = Config.model,
         temperature = 0.2f,
@@ -134,8 +141,8 @@ val replyPrompt = Record(
 )
 
 val summaryPrompt = Record(
-    role = "system",
-    content = "以下是与用户的一段对话记录，已经是结构化的JSON信息，你需要总结这段对话，要求如下：" +
+    role = "user",
+    content = "以下是与用户的一段对话记录，你需要总结这段对话，要求如下：" +
             "1.要完整概括对话的内容，包括发生了什么，说了什么等等" +
             "2.信息要准确无误，不许编造信息" +
             "3.要去除无用信息，只保留有用信息，如做了什么，用户表达了什么，内心想法等等" +
